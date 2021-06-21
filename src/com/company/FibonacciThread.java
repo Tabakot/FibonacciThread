@@ -20,7 +20,9 @@ class FibonacciThread extends Thread {
     @Override
     public void run() {
         try {
-            fibNumber = fib.next();
+            if (fib.hasNext()) {
+                fibNumber = fib.next();
+            }
             Thread.sleep((long) (10 * Math.random()));
         } catch (InterruptedException e) {
             System.out.printf("Поток %2d прерван%n", id);

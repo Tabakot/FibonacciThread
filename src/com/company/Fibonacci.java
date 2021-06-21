@@ -2,13 +2,14 @@ package com.company;
 
 import java.math.BigInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.StampedLock;
 
 public class Fibonacci implements Iterator<BigInteger> {
     private final AtomicReference<BigInteger> cacheValue;
     private final AtomicReference<BigInteger> cachePrev;
-    private final ReadWriteLock lock = new ReentrantReadWriteLock();
+    private final StampedLock lock = new StampedLock();
+
+
 
 
     public Fibonacci()
@@ -22,8 +23,7 @@ public class Fibonacci implements Iterator<BigInteger> {
         BigInteger next;
         BigInteger prev;
         BigInteger value;
-
-        lock.writeLock().lock();
+        long stamp = lock.writeLock();
         try {
             prev = cachePrev.get();
             value = cacheValue.get();
@@ -31,14 +31,14 @@ public class Fibonacci implements Iterator<BigInteger> {
             cacheValue.compareAndSet(value, next);
             cachePrev.compareAndSet(prev, value);
         } finally {
-            lock.writeLock().unlock();
+            lock.unlock(stamp);
         }
         return next;
     }
 
     @Override
     public boolean hasNext() {
-        return false;
+        return cacheValue.get().bitLength() < 64;
     }
 
     @Override
