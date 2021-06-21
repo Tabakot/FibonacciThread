@@ -1,10 +1,12 @@
 package com.company;
 
+import java.lang.reflect.Array;
+import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Main {
-
     public static void main(String[] args) {
         Fibonacci fib = new Fibonacci();
         List<FibonacciThread> fibonacciThreads = new ArrayList<>();
@@ -15,17 +17,16 @@ public class Main {
         int summa;
         do {
             summa = 0;
-            for (int i = 0; i < fibonacciThreads.size(); i++) {
-                if (!fibonacciThreads.get(i).thread.isAlive()) {
-                    fibonacciThreads.get(i).printSequence();
+            for (FibonacciThread fibonacciThread : fibonacciThreads) {
+                if (!fibonacciThread.thread.isAlive()) {
+                    fibonacciThread.printSequence();
                     summa++;
                 }
             }
             try {
                 Thread.sleep(100);
-            } catch (InterruptedException e) {}
+            } catch (InterruptedException ignored) {}
         } while (summa < fibonacciThreads.size());
-        System.out.println(Fibonacci.arrayList);
         System.exit(0);
     }
 }

@@ -1,41 +1,44 @@
 package com.company;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class Fibonacci implements Iterator<BigInteger> {
-    private AtomicReference<BigInteger> cacheValue;
-    private AtomicReference<BigInteger> cachePrev;
-    static List<BigInteger> arrayList;
-    private BigInteger next;
-    private BigInteger prev;
-    private BigInteger value;
+    private final AtomicReference<BigInteger> cacheValue;
+    private final AtomicReference<BigInteger> cachePrev;
+    private final ReadWriteLock lock = new ReentrantReadWriteLock();
+
 
     public Fibonacci()
     {
-        prev = BigInteger.ONE;
         cacheValue = new AtomicReference<>(BigInteger.ONE);
         cachePrev = new AtomicReference<>(BigInteger.ONE);
-        arrayList = new ArrayList<>();
-        arrayList.add(BigInteger.ONE);
     }
 
     @Override
     public BigInteger next() {
-        do {
+        BigInteger next;
+        BigInteger prev;
+        BigInteger value;
+
+        lock.writeLock().lock();
+        try {
+            prev = cachePrev.get();
             value = cacheValue.get();
             next = prev.add(value);
-        } while (hasNext());
-        prev = value;
-        arrayList.add(next);
+            cacheValue.compareAndSet(value, next);
+            cachePrev.compareAndSet(prev, value);
+        } finally {
+            lock.writeLock().unlock();
+        }
         return next;
     }
 
     @Override
     public boolean hasNext() {
-        return !cacheValue.compareAndSet(value, next);
+        return false;
     }
 
     @Override
