@@ -15,13 +15,13 @@ public class Fibonacci implements Iterator<BigInteger> {
     @Override
     public BigInteger next() {
         BigInteger next;
-        BigInteger cur;
+        BigInteger prev;
         FibonacciNumber value;
         do {
             value = cacheValue.get();
-            cur = value.getNext();
+            prev = value.getNext();
             next = value.getPrev().add(value.getNext());
-        } while(!cacheValue.compareAndSet(value, new FibonacciNumber(cur, next)));
+        } while(!cacheValue.compareAndSet(value, new FibonacciNumber(prev, next)));
         return next;
     }
 
